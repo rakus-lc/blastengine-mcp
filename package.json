@@ -1,0 +1,40 @@
+{
+  "name": "blastengine-mcp-server",
+  "version": "0.1.0",
+  "description": "Local stdio MCP server for selected blastengine API operations.",
+  "type": "module",
+  "license": "MIT",
+  "author": "株式会社ラクスライトクラウド",
+  "bin": {
+    "blastengine-mcp-server": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md"
+  ],
+  "scripts": {
+    "clean": "node scripts/clean-dist.mjs",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "test": "npm run build && vitest run && npm run test:stdio",
+    "test:stdio": "bash tests/stdio-smoke.sh",
+    "test:watch": "vitest",
+    "lint": "tsc -p tsconfig.test.json --noEmit",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.21.0",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
+  }
+}

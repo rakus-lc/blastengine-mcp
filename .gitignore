@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+*.log
+
+# Internal planning notes are not intended for the public OSS repository.
+docs/internal/
+
+# macOS
+.DS_Store

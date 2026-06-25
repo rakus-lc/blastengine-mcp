@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case
+      description: Describe the workflow and whether it is read-only or has delivery side effects.
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk level
+      options:
+        - Read-only
+        - Sends mail
+        - Bulk delivery
+        - Settings or deletion
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+    validations:
+      required: true
+

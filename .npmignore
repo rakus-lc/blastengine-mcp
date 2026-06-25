@@ -1,0 +1,11 @@
+docs/internal/
+.agents/
+.codex/
+.env
+.env.*
+coverage/
+tests/
+src/
+*.log
+vitest.config.ts
+tsconfig.json

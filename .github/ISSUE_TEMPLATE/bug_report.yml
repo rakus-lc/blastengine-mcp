@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a reproducible problem
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Do not include bearer tokens, real recipient lists, mail bodies, or CSV contents.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Redact tokens, addresses, subjects, and message bodies.
+
