@@ -15,13 +15,13 @@ API の一部の操作を MCP 対応 AI クライアントから利用できる�
 - 配信の検索・詳細取得
 - メール配信ログの検索・詳細取得
 - 使用量の確認（最新・月次）
-- 送信系ツールは既定で無効（環境変数で明示的に有効化）
+- 送信系ツールは既定で無効（設定で明示的に有効化）
 
 ## 利用開始
 
 ### 必要条件
 
-- Node.js 22 LTS 以上
+- Node.js 22.15 以上（手動セットアップの場合。MCPB でのインストールでは macOS / Windows 環境向けに Node.js がバンドルされます）
 - blastengine アカウント
 
 ### アカウントの準備
@@ -29,6 +29,23 @@ API の一部の操作を MCP 対応 AI クライアントから利用できる�
 ご利用には blastengine のアカウントが必要です。お持ちでない場合、まずは[無料トライアル申し込みフォーム](https://app.engn.jp/be/order/request-form)から登録してください。
 
 登録後、[管理画面](https://app.engn.jp/be/admin/login) でログイン ID と API キーを確認できます。
+
+### インストール（MCPB — Claude Desktop 向け・推奨）
+
+Claude Desktop をお使いの場合は、MCPB バンドル（`.mcpb` ファイル）で簡単にインストールできます:
+
+1. [GitHub Releases](https://github.com/rakus-lc/blastengine-mcp/releases/latest) から
+   `blastengine-mcp-server-<バージョン>.mcpb` をダウンロードします
+2. ダウンロードしたファイルをダブルクリックするか、Claude Desktop の
+   「設定 → エクステンション」画面へドラッグ＆ドロップします
+3. 拡張の設定画面で blastengine のログイン ID と API キーを入力します
+   （認証情報は OS のキーチェーンに保存されます）
+4. 必要に応じて送信系機能（トランザクション送信・一斉配信・CSV インポート）の
+   トグルを有効化します（既定はすべて無効です）
+
+> **更新について**: 手動でインストールした MCPB は自動更新されません。新しい
+> バージョンがリリースされたら、Releases から新しい `.mcpb` をダウンロードして
+> 再度インストール（上書き）してください。設定済みの認証情報は引き継がれます。
 
 ### インストール（手動セットアップ）
 
@@ -43,18 +60,15 @@ stdio のエントリポイント `dist/index.js` が生成されます。
 
 ### MCP クライアント設定
 
-お使いの MCP クライアントの設定に、ビルドしたエントリポイントを追加します:
-
-1. MCP 設定を開きます
-2. MCP 設定セクションに移動します
-3. 次の設定を追加します：
+お使いの MCP クライアントの設定ファイル（例: Claude Desktop の場合は
+`claude_desktop_config.json`）に、ビルドしたエントリポイントを次のように追加します:
 
 ```json
 {
   "mcpServers": {
     "blastengine": {
       "command": "node",
-      "args": ["/path/to/blastengine_mcp/dist/index.js"],
+      "args": ["/path/to/blastengine-mcp/dist/index.js"],
       "env": {
         "BLASTENGINE_LOGIN_ID": "...",
         "BLASTENGINE_API_KEY": "...",
@@ -75,7 +89,8 @@ stdio のエントリポイント `dist/index.js` が生成されます。
 ## 機能モード（送信系の有効化）
 
 サーバーは参照のみの状態で起動します。メール送信は取り消せないため（誤配信リスク）、送信系
-の機能は既定で無効で、対応する環境変数を `true` にして初めて有効になります。
+の機能は既定で無効です。MCPB インストールの場合は拡張の設定画面のトグルで、手動セットアップ
+の場合は対応する環境変数を `true` にして、それぞれ有効化してください。
 
 - `BLASTENGINE_ENABLE_SEND` … トランザクション送信に必要
 - `BLASTENGINE_ENABLE_BULK` … 一斉配信に必要
@@ -142,6 +157,10 @@ yamada@example.com に件名「ご請求のご案内」で本文を作成して�
 
 ## 環境変数
 
+以下は手動セットアップ向けの一覧です。MCPB インストールでは大半の項目を拡張の設定画面
+から入力・切り替えできます（`BLASTENGINE_CLIENT_HEADERS` を除く。詳細は「送信される
+識別情報について」を参照）。
+
 | 変数 | 既定値 | 用途 |
 | --- | --- | --- |
 | `BLASTENGINE_LOGIN_ID` | なし | Bearer トークン生成に使う blastengine ログイン ID |
@@ -152,8 +171,6 @@ yamada@example.com に件名「ご請求のご案内」で本文を作成して�
 | `BLASTENGINE_ENABLE_CSV_IMPORT` | `false` | CSV 宛先インポートを有効化 |
 | `BLASTENGINE_BULK_MAX_RECIPIENTS` | `50` | `blastengine_bulk_update_recipients` の最大宛先数 |
 | `BLASTENGINE_TIMEOUT_MS` | `30000` | HTTP タイムアウト（ミリ秒） |
-| `BLASTENGINE_ACCEPT_LANGUAGE` | `ja-JP` | API リクエストの `Accept-Language`（`ja-JP` または `en-US`） |
-| `BLASTENGINE_LOG_LEVEL` | `info` | stderr 診断ログのレベル（`silent` / `error` / `warn` / `info` / `debug`） |
 | `BLASTENGINE_CLIENT_HEADERS` | `true` | 利用状況把握のための識別ヘッダ（mcp 経由・バージョン・ツール名）の送信可否。本文・宛先・認証情報は含まれません。詳細は「送信される識別情報について」を参照 |
 
 ※ `BLASTENGINE_BULK_MAX_RECIPIENTS` に 50 を超える値を指定しても blastengine API 側で弾かれます。50 通を超える宛先を登録したい場合は `blastengine_bulk_import_recipients_csv` を使ってください。
@@ -161,20 +178,22 @@ yamada@example.com に件名「ご請求のご案内」で本文を作成して�
 ## 社内ネットワーク（HTTPS 検査）
 
 HTTPS 検査プロキシ環境では、Node.js は既定で社内ルート CA を信頼せず、API 呼び出しが
-`SELF_SIGNED_CERT_IN_CHAIN` で失敗します。サーバーの `env` に `NODE_USE_SYSTEM_CA=1` を
-追加し、OS の証明書ストア（IT が社内 CA を導入している場所）を信頼させてください
-（`node --use-system-ca` での起動と同等です）:
+`SELF_SIGNED_CERT_IN_CHAIN` で失敗します。
+
+**MCPB でインストールした場合**: 必要な設定が自動で適用されるため、追加の対応は不要です
+（Node.js 22.15.0 以上が必要）。
+
+**手動セットアップの場合**: `node` の起動引数に `--use-system-ca` を追加してください:
 
 ```json
 {
   "mcpServers": {
     "blastengine": {
       "command": "node",
-      "args": ["/path/to/blastengine_mcp/dist/index.js"],
+      "args": ["--use-system-ca", "/path/to/blastengine-mcp/dist/index.js"],
       "env": {
         "BLASTENGINE_LOGIN_ID": "...",
-        "BLASTENGINE_API_KEY": "...",
-        "NODE_USE_SYSTEM_CA": "1"
+        "BLASTENGINE_API_KEY": "..."
       }
     }
   }
@@ -192,10 +211,9 @@ HTTPS 検査プロキシ環境では、Node.js は既定で社内ルート CA �
 
 ## セキュリティ
 
-認証情報はローカルプロセス内に留まり、メール本文・宛先一覧・CSV 内容・プロンプトとともに
-ログ出力されません。送信系ツールは実際にメールを送信するため、最小権限の API キーを使い、
-信頼できる環境で実行してください。認証情報やトークンなどの機微な情報を GitHub Issue に記載
-しないでください。
+認証情報はローカルプロセス内に留まり、ログ出力されません。
+送信系ツールは実際にメールを送信するため、最小権限の API キーを使い、信頼できる環境で
+実行してください。認証情報やトークンなどの機微な情報を GitHub Issue に記載しないでください。
 
 ## 送信される識別情報について
  
@@ -206,14 +224,34 @@ HTTPS 検査プロキシ環境では、Node.js は既定で社内ルート CA �
 常に付与されるヘッダ:
  
 - `User-Agent: blastengine-mcp/<version>` … MCP サーバー経由であることとそのバージョン
+
 `BLASTENGINE_CLIENT_HEADERS=true`（既定）のとき、追加で次のヘッダを付与します:
- 
+
 - `X-Blastengine-Client: mcp`
 - `X-Blastengine-Client-Version: <version>`
 - `X-Blastengine-MCP-Tool: <ツール名>` … 呼び出したツール名（例: `blastengine_deliveries_list`）
 - `X-Blastengine-MCP-Mode: <モード>` … 一斉配信など一部操作の種別
-`BLASTENGINE_CLIENT_HEADERS=false` を設定すると、上記 `X-Blastengine-*` ヘッダの付与を
-無効化できます。なお `User-Agent` はこの設定に関わらず常に付与されます。
+
+手動セットアップの場合、`BLASTENGINE_CLIENT_HEADERS=false` を設定すると、上記
+`X-Blastengine-*` ヘッダの付与を無効化できます（MCPB インストールではこの設定項目は
+提供していません）。なお `User-Agent` はこの設定に関わらず常に付与されます。
+
+## プライバシーポリシー（Privacy Policy）
+
+認証情報（ログイン ID・API キー・Bearer トークン）はローカルプロセス内でのみ使用され、
+本サーバーの外部（AI クライアントなど）には送信されません（詳細は「セキュリティ」を参照）。
+
+一方、メール本文・宛先・CSV 内容・配信ログなど、ツールの入力および実行結果は、ご利用の
+MCP クライアント（AI エージェント）とのやり取りの一部として扱われます。Claude Desktop
+のようにクラウド型の AI をお使いの場合、これらの内容は当該 AI クライアントの提供元にも
+送信されます。その扱いについては、お使いの AI クライアントのプライバシーポリシーをご確認
+ください。
+
+本サーバーから blastengine API へのリクエスト（認証情報・メール本文・宛先や、識別ヘッダ。
+詳細は「送信される識別情報について」を参照）については、提供元である株式会社ラクスライト
+クラウドの個人情報保護方針に従います。本方針は姉妹サービス blastmail と共通です:
+
+- <https://blastmail.jp/privacy/>
 
 ## コントリビュート
 
