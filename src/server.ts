@@ -50,8 +50,6 @@ import {
   mailResultsListShape,
   sendTransactionSchema,
   sendTransactionShape,
-  usageLatestSchema,
-  usageLatestShape,
   usageMonthSchema,
   usageMonthShape
 } from "./schemas.js";
@@ -207,14 +205,14 @@ export function createBlastengineMcpServer(deps: ServerDependencies = {}): McpSe
     (input) => mailLogGet(input, ctx)
   );
 
-  registerTool(
-    server,
+  server.registerTool(
     "blastengine_usage_latest_get",
-    "Get latest blastengine usage.",
-    { title: "最新使用量取得", readOnlyHint: true },
-    usageLatestShape,
-    usageLatestSchema,
-    () => usageLatestGet(ctx)
+    {
+      title: "最新使用量取得",
+      description: "Get latest blastengine usage.",
+      annotations: { title: "最新使用量取得", readOnlyHint: true }
+    },
+    async () => toToolResult(() => usageLatestGet(ctx))
   );
 
   registerTool(
