@@ -27,12 +27,13 @@ jobs:
 
       - name: Check tag matches all version sources
         run: |
+          # manifest.json's version is stamped from package.json at build time
+          # (scripts/build-mcpb.mjs), so package.json is the single source of truth.
           TAG_VERSION="${GITHUB_REF_NAME#v}"
           PKG_VERSION="$(node -p "require('./package.json').version")"
           LOCK_VERSION="$(node -p "require('./package-lock.json').version")"
-          MANIFEST_VERSION="$(node -p "require('./manifest.json').version")"
           MISMATCH=""
-          for name_ver in "package.json=$PKG_VERSION" "package-lock.json=$LOCK_VERSION" "manifest.json=$MANIFEST_VERSION"; do
+          for name_ver in "package.json=$PKG_VERSION" "package-lock.json=$LOCK_VERSION"; do
             ver="${name_ver#*=}"
             if [ "$TAG_VERSION" != "$ver" ]; then
               MISMATCH="$MISMATCH $name_ver"
@@ -62,9 +63,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft 2>/dev/null)" = "true" ]; then
-            echo "Draft release already exists — deleting stale draft before re-creating"
-            gh release delete "$GITHUB_REF_NAME" --yes
+          set +e
+          RELEASE_JSON="$(gh release view "$GITHUB_REF_NAME" --json isDraft 2>&1)"
+          RELEASE_STATUS=$?
+          set -e
+          if [ $RELEASE_STATUS -eq 0 ]; then
+            if [ "$(echo "$RELEASE_JSON" | jq -r .isDraft)" = "true" ]; then
+              echo "Draft release already exists — deleting stale draft before re-creating"
+              gh release delete "$GITHUB_REF_NAME" --yes
+            fi
+          elif echo "$RELEASE_JSON" | grep -qi "release not found"; then
+            echo "No existing release for $GITHUB_REF_NAME"
+          else
+            echo "::error::failed to check for an existing release: $RELEASE_JSON"
+            exit 1
           fi
           cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
           インストール手順は [README](https://github.com/rakus-lc/blastengine-mcp#インストールmcpb--claude-desktop-向け推奨) を参照してください。

@@ -200,6 +200,9 @@ export const mailLogGetShape = {
 };
 export const mailLogGetSchema = z.object(mailLogGetShape);
 
+export const usageLatestShape = {};
+export const usageLatestSchema = z.object(usageLatestShape);
+
 export const usageMonthShape = {
   month: z.string().regex(/^\d{6}$/)
 };

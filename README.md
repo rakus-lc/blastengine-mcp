@@ -172,6 +172,8 @@ yamada@example.com に件名「ご請求のご案内」で本文を作成して�
 | `BLASTENGINE_BULK_MAX_RECIPIENTS` | `50` | `blastengine_bulk_update_recipients` の最大宛先数 |
 | `BLASTENGINE_TIMEOUT_MS` | `30000` | HTTP タイムアウト（ミリ秒） |
 | `BLASTENGINE_CLIENT_HEADERS` | `true` | 利用状況把握のための識別ヘッダ（mcp 経由・バージョン・ツール名）の送信可否。本文・宛先・認証情報は含まれません。詳細は「送信される識別情報について」を参照 |
+| `BLASTENGINE_ACCEPT_LANGUAGE` | `ja-JP` | API エラーメッセージの言語（`ja-JP` または `en-US`） |
+| `BLASTENGINE_LOG_LEVEL` | `info` | ログ出力レベル（`silent` / `error` / `warn` / `info` / `debug`） |
 
 ※ `BLASTENGINE_BULK_MAX_RECIPIENTS` に 50 を超える値を指定しても blastengine API 側で弾かれます。50 通を超える宛先を登録したい場合は `blastengine_bulk_import_recipients_csv` を使ってください。
 
