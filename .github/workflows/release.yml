@@ -62,7 +62,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft 2>/dev/null; then
+          if [ "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft 2>/dev/null)" = "true" ]; then
             echo "Draft release already exists — deleting stale draft before re-creating"
             gh release delete "$GITHUB_REF_NAME" --yes
           fi
