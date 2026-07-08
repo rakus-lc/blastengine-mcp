@@ -25,7 +25,7 @@
     "entry_point": "dist/index.js",
     "mcp_config": {
       "command": "node",
-      "args": ["--use-system-ca", "${__dirname}/dist/index.js"],
+      "args": ["${__dirname}/dist/index.js"],
       "env": {
         "BLASTENGINE_LOGIN_ID": "${user_config.login_id}",
         "BLASTENGINE_API_KEY": "${user_config.api_key}",
