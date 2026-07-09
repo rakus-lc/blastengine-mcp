@@ -52,11 +52,18 @@ npm test
 
 ## メンテナ向けリリースチェック
 
+1. `package.json`・`package-lock.json`・`manifest.json` のバージョンを揃えて更新
+   （`src/version.ts` は `package.json` から自動導出）
+2. 以下を実行して問題がないことを確認:
+
 ```sh
 npm run typecheck
 npm test
 npm_config_cache=/tmp/npm-cache npm pack --dry-run
+npm run build:mcpb
 ```
 
-パッケージ内容に内部メモ・認証情報・実アドレスを含むフィクスチャ・`.env` が含まれない
-ことを確認してください。リリースは GitHub Releases で公開します。
+3. `npm pack --dry-run` の出力に内部メモ・認証情報・実アドレスを含むフィクスチャ・`.env` が含まれないことを確認
+4. `build/*.mcpb` が生成されることを確認
+5. `v<バージョン>` タグを push — Release ワークフローが CI（typecheck・test・pack）を再実行し、MCPB バンドル・チェックサム・来歴attestationを含むドラフトリリースを作成します
+6. GitHub Releases でドラフトを確認し、公開

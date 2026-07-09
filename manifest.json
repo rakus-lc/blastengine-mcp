@@ -1,0 +1,153 @@
+{
+  "manifest_version": "0.2",
+  "name": "blastengine-mcp-server",
+  "display_name": "blastengine",
+  "version": "0.2.0",
+  "description": "blastengine のメール配信（トランザクション送信・一斉配信・ログ / 使用量確認）を AI クライアントから操作できる MCP サーバー",
+  "long_description": "blastengine 公式の MCP サーバーです。[blastengine](https://blastengine.jp/) は、トランザクションメール・一斉配信・配信ログ確認に対応した国内向けのメール配信サービスです。\n\n- トランザクションメールの送信（1 宛先）\n- 一斉配信（下書き作成・宛先登録・プレビュー・即時 / 予約の確定）\n- CSV ファイルからの宛先一括インポート\n- 配信の検索・詳細取得、メール配信ログの検索・詳細取得\n- 使用量の確認（最新・月次）\n\n認証情報はローカルプロセス内に留まり、ログ出力されません。メール送信は取り消せないため、送信系ツール（トランザクション送信・一斉配信・CSV インポート）は既定で無効です。利用する場合は設定画面で明示的に有効化してください。",
+  "author": {
+    "name": "株式会社ラクスライトクラウド",
+    "url": "https://blastengine.jp/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rakus-lc/blastengine-mcp"
+  },
+  "homepage": "https://blastengine.jp/",
+  "documentation": "https://github.com/rakus-lc/blastengine-mcp#readme",
+  "support": "https://github.com/rakus-lc/blastengine-mcp/issues",
+  "privacy_policies": ["https://blastmail.jp/privacy/"],
+  "license": "MIT",
+  "icon": "icon.png",
+  "keywords": ["blastengine", "email", "mail", "delivery", "transactional", "bulk", "メール配信"],
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": {
+        "BLASTENGINE_LOGIN_ID": "${user_config.login_id}",
+        "BLASTENGINE_API_KEY": "${user_config.api_key}",
+        "BLASTENGINE_ENABLE_SEND": "${user_config.enable_send}",
+        "BLASTENGINE_ENABLE_BULK": "${user_config.enable_bulk}",
+        "BLASTENGINE_ENABLE_CSV_IMPORT": "${user_config.enable_csv_import}",
+        "BLASTENGINE_TIMEOUT_MS": "${user_config.timeout_ms}",
+        "NODE_USE_SYSTEM_CA": "1"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "blastengine_deliveries_list",
+      "description": "配信情報を検索します"
+    },
+    {
+      "name": "blastengine_delivery_get",
+      "description": "配信の詳細を取得します"
+    },
+    {
+      "name": "blastengine_mail_results_list",
+      "description": "メール配信ログを検索します"
+    },
+    {
+      "name": "blastengine_mail_log_get",
+      "description": "個別のメール配信ログを取得します"
+    },
+    {
+      "name": "blastengine_usage_latest_get",
+      "description": "最新の使用量を取得します"
+    },
+    {
+      "name": "blastengine_usage_month_get",
+      "description": "指定月（YYYYMM）の使用量を取得します"
+    },
+    {
+      "name": "blastengine_bulk_import_status",
+      "description": "CSV 宛先インポートのステータスを取得します"
+    },
+    {
+      "name": "blastengine_bulk_import_error_download",
+      "description": "CSV インポートのエラー ZIP をローカルに保存します"
+    },
+    {
+      "name": "blastengine_bulk_preview",
+      "description": "一斉配信の内容を確認用に取得します（一斉配信の有効化が必要）"
+    },
+    {
+      "name": "blastengine_send_transaction",
+      "description": "トランザクションメールを 1 宛先に送信します（トランザクション送信の有効化が必要）"
+    },
+    {
+      "name": "blastengine_bulk_begin",
+      "description": "一斉配信の下書きを作成します（一斉配信の有効化が必要）"
+    },
+    {
+      "name": "blastengine_bulk_update_recipients",
+      "description": "一斉配信下書きの宛先・内容を更新します（一斉配信の有効化が必要）"
+    },
+    {
+      "name": "blastengine_bulk_commit_scheduled",
+      "description": "一斉配信を予約日時で確定します（一斉配信の有効化が必要）"
+    },
+    {
+      "name": "blastengine_bulk_commit_immediate",
+      "description": "一斉配信を即時確定します（一斉配信の有効化が必要）"
+    },
+    {
+      "name": "blastengine_bulk_import_recipients_csv",
+      "description": "ローカル CSV から宛先を一括インポートします（一斉配信と CSV インポートの有効化が必要）"
+    }
+  ],
+  "tools_generated": false,
+  "user_config": {
+    "login_id": {
+      "type": "string",
+      "title": "blastengine ログイン ID",
+      "description": "blastengine 管理画面で確認できるログイン ID。API キーとともに Bearer トークンの生成に使用します。",
+      "sensitive": true,
+      "required": true
+    },
+    "api_key": {
+      "type": "string",
+      "title": "blastengine API キー",
+      "description": "blastengine 管理画面で確認できる API キー。",
+      "sensitive": true,
+      "required": true
+    },
+    "enable_send": {
+      "type": "boolean",
+      "title": "トランザクション送信を有効化",
+      "description": "blastengine_send_transaction によるメール送信を許可します。実際にメールが送信されます。",
+      "required": false,
+      "default": false
+    },
+    "enable_bulk": {
+      "type": "boolean",
+      "title": "一斉配信を有効化",
+      "description": "一斉配信（下書き作成・宛先登録・プレビュー・確定）ツールを許可します。",
+      "required": false,
+      "default": false
+    },
+    "enable_csv_import": {
+      "type": "boolean",
+      "title": "CSV 宛先インポートを有効化",
+      "description": "ローカル CSV ファイルからの宛先一括インポートを許可します（一斉配信の有効化も必要）。",
+      "required": false,
+      "default": false
+    },
+    "timeout_ms": {
+      "type": "number",
+      "title": "HTTP タイムアウト（ミリ秒）",
+      "description": "blastengine API への HTTP リクエストのタイムアウト。大きな CSV インポートなどでタイムアウトする場合は値を大きくしてください。",
+      "required": false,
+      "default": 30000
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=22.15.0"
+    }
+  }
+}

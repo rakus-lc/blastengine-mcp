@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 import assert from "node:assert/strict";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
 const outputPath = process.argv[2];
 assert(outputPath, "output path is required");
@@ -17,11 +19,19 @@ assert.equal(initialized.result.serverInfo.name, "blastengine-mcp-server");
 
 const toolsResponse = responses.find((response) => response.id === 2);
 assert(toolsResponse, "tools/list response missing");
-const names = toolsResponse.result.tools.map((tool) => tool.name);
-assert(names.includes("blastengine_send_transaction"));
-assert(names.includes("blastengine_bulk_commit_immediate"));
-assert(names.includes("blastengine_bulk_import_recipients_csv"));
-assert(names.includes("blastengine_usage_latest_get"));
+const liveNames = toolsResponse.result.tools.map((tool) => tool.name).sort();
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const manifest = JSON.parse(await readFile(join(root, "manifest.json"), "utf8"));
+const manifestNames = manifest.tools.map((t) => t.name).sort();
+
+assert.deepEqual(
+  liveNames,
+  manifestNames,
+  `manifest.json tools[] is out of sync with the live server.\n` +
+    `  live:     ${JSON.stringify(liveNames)}\n` +
+    `  manifest: ${JSON.stringify(manifestNames)}`
+);
 
 console.log("stdio smoke ok");
 
